@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rongin ~ Color Palate Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Color Palette Generator">
+  <link rel="stylesheet" href="./css/style.css"/>
+  <link rel="icon" href="./assets/logo.ico"/>
+  <script src="./js/fontawesome.js" defer></script>
+  <script src="./js/colornames.js" defer></script>
+  <script src="./js/image_color.js" defer></script>
+  <script src="./js/nearest_color.min.js" defer></script>
+  <script src="./js/main.js" defer></script>
+</head>
+<body class="
+  bg-gray-800
+  text-slate-200
+  h-screen
+  w-screen
+  overflow-hidden
+  flex
+  ">
+  <div class="h-full w-[80px] bg-gray-900 flex flex-col justify-between text-2xl text-slate-400">
+    <div class="flex flex-col">
+	<button id="generate-tab-button" 
+	  onclick="show_tab('generate')"
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  flex flex-col justify-center items-center space-y-2">
+	  <i class="fa-solid fa-palette"></i>
+	  <span class="text-sm">Generate</span>
+	</button> 	
+	<button id="palette-tab-button" onclick="show_tab('palette')"
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  flex flex-col justify-center items-center space-y-2">
+	  <i class="fa-solid fa-swatchbook"></i>
+	  <span class="text-sm">Palette</span>
+	</button> 	
+	<button id="preview-tab-button" onclick="show_tab('preview'); render_preview()"
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  flex flex-col justify-center items-center space-y-2">
+	  <i class="fa-solid fa-eye"></i>
+	  <span class="text-sm">Preview</span>
+	</button> 	
+	<button id="saved-tab-button" onclick="show_tab('saved'); fetch_saved_palette()"
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  flex flex-col justify-center items-center space-y-2">
+	  <i class="fa-solid fa-bookmark"></i>
+	  <span class="text-sm">Saved</span>
+	</button> 	
+    </div>
+	<button id="info-tab-button" onclick="show_tab('info')"
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  flex flex-col justify-center items-center space-y-2">
+	  <i class="fa-solid fa-book-bookmark"></i>
+	  <span class="text-sm">Info</span>
+	</button> 	
+  </div>
+  <div class="h-full overflow-auto w-full">
+    <div id="generate-tab-body" class="h-full w-full hidden flex 
+      justify-center items-center flex-col space-y-5 relative">
+		<div class="absolute top-5 flex items-center">
+      		<img src="./assets/logo.png" alt="">
+		</div>
+		<div class="text-lg text-slate-400">
+		  <p class="text-center p-2">
+		  <b>Generate</b> an entire color palette <i class="fa-solid fa-swatchbook"></i>
+		  with each color  <b>shades & tones</b> using a single color.
+		  <br/>
+		  <b>Pick</b> a color from the <i>color picker</i> below or <b>Enter Hex</b> Color Value.
+		  </p>
+		</div>
+		<div class="flex flex-col space-y-3">
+		  <div class="flex flex-col space-y-3 w-full">
+		      <div class="flex items-center relative">
+			<span id="span-color-picker"
+			  class="h-[36px] w-[50px] absolute rounded-s-md"></span>
+			<span id="span-image-picker"
+			  onclick="open_image_file()"
+			  class="absolute rounded-s-md right-0 p-2 z-10 cursor-pointer hover:brightness-125">
+			  <i class="fa-solid fa-image"></i>
+			</span>
+			<input id="input-color-picker"
+			onchange="
+			document.getElementById('span-color-picker').style.background = this.value;
+			document.getElementById('input-color-text').value = this.value;
+			"
+			type="color" class="bg-gray-800 h-[36px] cursor-pointer
+		  	outline-none border-none opacity-0 z-10
+			rounded-s-md"/>
+			<input id="input-color-text"
+			oninput="
+			  check_valid_hex_color(this.value,this)
+			"
+			type="text" class="bg-gray-700 p-1 font-semibold text-lg rounded-e-md
+			pl-2 outline-none border-none"/>
+		      </div>
+		      <select
+			id="generation-type-selector"
+			class="bg-gray-700 p-2 rounded-md text-lg font-semibold outline-none">
+		        <option class="bg-gray-700" value="6;analogous" selected>Analogous</option>
+		        <option class="bg-gray-700" value="2;complementary">Complementary</option>
+		        <option class="bg-gray-700" value="3;triadic">Triadic</option>
+		        <option class="bg-gray-700" value="4;tetradic">Tetradic</option>
+		        <option class="bg-gray-700" value="6;neutral">Neutral</option>
+		        <option class="bg-gray-700" value="6;random">Random</option>
+		        <option class="bg-gray-700" value="6;compound">Compound</option>
+		        <option class="bg-gray-700" value="6;split_complementary">Split Complementary</option>
+		      </select>
+		      <div class="flex w-full">
+		      <button
+		        onclick="generate_()"
+			class="p-2 font-semibold bg-blue-500
+			hover:bg-blue-600
+			rounded-s-md text-lg w-full">
+			Generate
+			    <i class="fa-solid fa-palette"></i>
+		      </button>
+		      <button 
+			class="p-2 font-semibold bg-blue-500
+			hover:bg-blue-600
+			rounded-e-md text-lg"
+			onclick="change_random_color()">
+			<i class="fa-solid fa-rotate-right"></i>
+		      </button>
+		      </div>
+		  </div>
+		</div>
+    </div>
+    <div id="palette-tab-body" class="h-full w-full hidden p-2">
+	  <div class="flex justify-center items-center h-full w-full message-no-palette">
+	    <p>
+	      No Palette has been Generated.
+	    </p>
+	  </div>
+	  <div id="palette-view">
+	  </div>
+    </div>
+    <div id="preview-tab-body" class="h-full w-full hidden flex flex-col">
+	<div class="w-full h-full flex justify-center items-center">
+	  No Preview, Generate Color Palette First.
+	</div>
+    </div>
+    <div id="saved-tab-body" class="h-full w-full hidden">
+	  <div
+	    id="saved-palette-list"
+	    class="flex justify-center items-center h-full w-full p-4">
+	    <p>
+	      No Saved Palette Found!
+	    </p>
+	  </div>
+    </div>
+    <div id="info-tab-body" class="h-full w-full hidden">
+         <div class="flex flex-col px-4 p-2 text-slate-300">
+		<div class="p-2 flex-col flex">
+		  <span class=" text-3xl ">
+		    How it Works? <i class="fa-solid fa-palette"></i>
+		  </span>
+		    <span class="mt-5 mb-3">
+		      Just click on the color picker, pick a color and click on the generate button. Alternatively, you could enter a hex color code in the input field and click on the generate button.
+		      </span>
+		      <span class="mb-3">
+			You can also click on the image icon, select an image to pick a prominent color from the image.
+		      </span>
+		      <span class="mb-3">
+		      Moreover, you could select from a wide variety of algorithms to generate color palette, by default it generates analogous color palette. To select a specific algorithm click on the select field below color picker and select your desired algorithm.
+		      </span>
+		      <span class="mb-3">
+			To select random color for generation click on the circular arrow button right to the generation button.
+		      </span>
+		  <span class=" text-3xl ">
+		    Features <i class="fa-solid fa-swatchbook"></i>
+		  </span>
+		    <ul class="mt-5 mb-3 list-inside list-disc">
+			<li>Select prominent color from an <i class="fa-solid fa-image"></i> Image.</li>
+			<li>Every Color is generated with 10 shades from light to dark.</li>
+			<li>Colors can be edited or changed in the palette view by clicking on the slider button <i class="fa-solid fa-sliders"></i> above the color that you desire to change.</li>
+			<li>You can add more color to the generated color palette by scrolling down to the end and clicking on the Add Color button.</li>
+			<li>You can delete a color from the color palette by clicking on the trash icon <i class="fa-solid fa-trash"></i> above the color.</li>
+			<li>Indivdual color can be copied just by clicking on it.</li>
+			<li>Moreover, you can export the whole color palette by clicking on the export button.</li>
+			<li>Export format is available for CSS, SCSS, LESS and Tailwind. If you want other formats open up a github issue.</li>
+			<li>Color Palette can be saved by clicking on the Save button, later you could view the saved color palette from the <i class="fa-solid fa-bookmark"></i> Saved Tab.</li>
+			<li>After color palette generation, you could go to the Preview Tab <i class="fa-solid fa-eye"></i> to preview the colors in action on the components such as navbar, svg, butons, etc.
+			</li>
+		      </ul>
+		</div>
+	 </div>
+    </div>
+  </div>
+    <div
+      id="loading-screen"
+      class="absolute top-0 left-0 flex justify-center items-center w-screen h-screen bg-black/90 hidden">
+	<div class="p-2 text-slate-200"> Loading... </div>
+    </div>
+</body>
+</html>
