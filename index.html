@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Rongin ~ Color Palate Generator</title>
+  <title>Rongin ~ Color Palette Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Color Palette Generator">
-  <link rel="stylesheet" href="./css/style.css"/>
   <link rel="icon" href="./assets/logo.ico"/>
+  <link rel="stylesheet" href="./css/style.css"/>
   <script src="./js/fontawesome.js" defer></script>
   <script src="./js/colornames.js" defer></script>
   <script src="./js/image_color.js" defer></script>
@@ -21,40 +21,40 @@
   overflow-hidden
   flex
   ">
-  <div class="h-full w-[80px] bg-gray-900 flex flex-col justify-between text-2xl text-slate-400">
+  <div class="h-full w-[80px] bg-gray-900 flex flex-col justify-start text-2xl text-slate-400">
     <div class="flex flex-col">
 	<button id="generate-tab-button" 
 	  onclick="show_tab('generate')"
-	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 
 	  flex flex-col justify-center items-center space-y-2">
 	  <i class="fa-solid fa-palette"></i>
 	  <span class="text-sm">Generate</span>
 	</button> 	
 	<button id="palette-tab-button" onclick="show_tab('palette')"
-	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 
 	  flex flex-col justify-center items-center space-y-2">
 	  <i class="fa-solid fa-swatchbook"></i>
 	  <span class="text-sm">Palette</span>
 	</button> 	
 	<button id="preview-tab-button" onclick="show_tab('preview'); render_preview()"
-	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 
 	  flex flex-col justify-center items-center space-y-2">
 	  <i class="fa-solid fa-eye"></i>
 	  <span class="text-sm">Preview</span>
 	</button> 	
 	<button id="saved-tab-button" onclick="show_tab('saved'); fetch_saved_palette()"
-	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 
 	  flex flex-col justify-center items-center space-y-2">
 	  <i class="fa-solid fa-bookmark"></i>
 	  <span class="text-sm">Saved</span>
 	</button> 	
-    </div>
 	<button id="info-tab-button" onclick="show_tab('info')"
-	  class="p-2 hover:bg-gray-800 hover:text-slate-100 outline-none
+	  class="p-2 hover:bg-gray-800 hover:text-slate-100 
 	  flex flex-col justify-center items-center space-y-2">
-	  <i class="fa-solid fa-book-bookmark"></i>
+	  <i class="fa-solid fa-circle-question"></i>
 	  <span class="text-sm">Info</span>
 	</button> 	
+    </div>
   </div>
   <div class="h-full overflow-auto w-full">
     <div id="generate-tab-body" class="h-full w-full hidden flex 
@@ -75,11 +75,13 @@
 		      <div class="flex items-center relative">
 			<span id="span-color-picker"
 			  class="h-[36px] w-[50px] absolute rounded-s-md"></span>
-			<span id="span-image-picker"
-			  onclick="open_image_file()"
-			  class="absolute rounded-s-md right-0 p-2 z-10 cursor-pointer hover:brightness-125">
-			  <i class="fa-solid fa-image"></i>
-			</span>
+		      <button 
+			class="absolute rounded-s-md right-0 p-2 z-10 cursor-pointer hover:brightness-125
+			p-2 font-semibold
+			rounded-e-md text-lg"
+			onclick="change_random_color()">
+			  <i class="fa-solid fa-dice"></i>
+		      </button>
 			<input id="input-color-picker"
 			onchange="
 			document.getElementById('span-color-picker').style.background = this.value;
@@ -93,11 +95,29 @@
 			  check_valid_hex_color(this.value,this)
 			"
 			type="text" class="bg-gray-700 p-1 font-semibold text-lg rounded-e-md
-			pl-2 outline-none border-none"/>
+			pl-2  border-none"/>
+		      </div>
+		      <div class="flex flex-col relative">
+			<button id="span-image-picker"
+			  onclick="open_image_file()"
+			  class="rounded-md
+			  bg-gray-700 flex
+			  cursor-pointer
+			  hover:brightness-125 z-10 relative "
+			  title="Select Color From an Image!">
+			    <span class="p-2 border-r border-slate-500 px-4">
+			      <i class="fa-solid fa-image"></i>
+			    </span>
+			  <span class="p-2 font-semibold"> Upload Image </span>
+			</button>
+			<div class="grid grid-cols-6 rounded-b-md hidden -translate-y-1
+			     justify-items-center items-center bg-gray-900/50 pt-2"
+			  id="image-generated-color">
+			</div>
 		      </div>
 		      <select
 			id="generation-type-selector"
-			class="bg-gray-700 p-2 rounded-md text-lg font-semibold outline-none">
+			class="bg-gray-700 p-2 rounded-md text-lg font-semibold ">
 		        <option class="bg-gray-700" value="6;analogous" selected>Analogous</option>
 		        <option class="bg-gray-700" value="2;complementary">Complementary</option>
 		        <option class="bg-gray-700" value="3;triadic">Triadic</option>
@@ -112,16 +132,9 @@
 		        onclick="generate_()"
 			class="p-2 font-semibold bg-blue-500
 			hover:bg-blue-600
-			rounded-s-md text-lg w-full">
+			rounded-md text-lg w-full">
 			Generate
 			    <i class="fa-solid fa-palette"></i>
-		      </button>
-		      <button 
-			class="p-2 font-semibold bg-blue-500
-			hover:bg-blue-600
-			rounded-e-md text-lg"
-			onclick="change_random_color()">
-			<i class="fa-solid fa-rotate-right"></i>
 		      </button>
 		      </div>
 		  </div>
@@ -144,14 +157,14 @@
     <div id="saved-tab-body" class="h-full w-full hidden">
 	  <div
 	    id="saved-palette-list"
-	    class="flex justify-center items-center h-full w-full p-4">
+	    class="flex justify-center items-center h-auto w-full p-4">
 	    <p>
 	      No Saved Palette Found!
 	    </p>
 	  </div>
     </div>
     <div id="info-tab-body" class="h-full w-full hidden">
-         <div class="flex flex-col px-4 p-2 text-slate-300">
+         <div class="flex flex-col px-4 p-2 text-slate-300 mb-5">
 		<div class="p-2 flex-col flex">
 		  <span class=" text-3xl ">
 		    How it Works? <i class="fa-solid fa-palette"></i>

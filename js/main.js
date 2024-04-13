@@ -1,9 +1,20 @@
 const remove_sc_reg = /[\s~`!@#$%^&*(){}\[\];:"'<,.>?\/\\|_+=-]/g
+let current_algo 
+let last_color_in_palette
 
 function add_new_color(){
   const random_color = random_hex_color()
   const elms = []
-  const palette = generate_palette(random_color, 1)
+  let to_gen_algo = current_algo
+  let to_base_color = last_color_in_palette
+  let palette
+  if(current_algo == "triadic" || current_algo == "tetradic" || current_algo == "complementary" ){
+    to_gen_algo = "random"
+    to_base_color = random_color
+    palette = generate_palette(to_base_color, 1, to_gen_algo)
+  } else {
+    palette = generate_palette(to_base_color, 2, to_gen_algo).splice(1,1)
+  }
   Array.from(palette).forEach((a) => {
 	const child = []
 	Array.from(a).forEach((c, i) => {
@@ -290,10 +301,44 @@ function display_palette(palette,type,delete_previous = true){
 	  	<div class="p-4 flex flex-col">
 			<div class="text-slate-200 font-semibold 
 	 		   md:mb-1 mb-5 flex md:justify-end justify-start flex-wrap">
+			   <div class="relative">
 			       <button class="p-2 bg-blue-600 rounded-md px-4 hover:bg-blue-700 m-2"
-			       onclick="show_export_menu()">
+			       onclick="
+				 document.querySelector('#export-menu').classList.toggle('hidden');
+				 document.querySelector('#export-menu > button').focus();
+			       ">
 				     <i class="fa-solid fa-file-export"></i> Export
 				</button>
+				<div class="flex flex-col absolute z-10 top-[50px] left-[-5px] hidden"
+				  id="export-menu"
+				  >
+					<button class="p-2 px-6 bg-gray-700 rounded-t-md
+					hover:brightness-150 focus:brightness-150" 
+					onclick="export_palette('css')" 
+					>
+					<i class="fa-brands fa-css3-alt"></i>	CSS
+					</button>
+					<button class="p-2 px-6 bg-gray-700
+					hover:brightness-150 focus:brightness-150"
+					onclick="export_palette('scss')" 
+					>
+					 <i class="fa-brands fa-sass"></i> SASS
+					</button>
+					<button class="p-2 px-6 bg-gray-700
+					hover:brightness-150 focus:brightness-150 "
+					onclick="export_palette('less')" 
+					>
+					 <i class="fa-brands fa-less"></i> Less
+					</button>
+					<button class="p-2 px-6 bg-gray-700 rounded-b-md 
+					hover:brightness-150 focus:brightness-150 flex space-x-2 text-sm"
+					onclick="export_palette('tailwind')" 
+					>
+					  <i class="fa-solid fa-code"></i> 
+					  <span>Tailwind</span>
+					</button>
+				</div>
+			   </div>
 				 <button 
 				 onclick="save_palette(this)"
 				 class="p-2 bg-blue-600 rounded-md px-4 hover:bg-blue-700 m-2">
@@ -316,12 +361,12 @@ function display_palette(palette,type,delete_previous = true){
 			<div class="flex flex-col mb-5" id="color-palette-list">
 				${elm.join("")}
 			</div>
-			<div class="flex justify-center w-full items-center">
+			<div class="flex justify-center w-full items-center mb-10">
 			  <button class="p-2 px-4 font-semibold text-lg
-			  bg-blue-600 hover:bg-blue-700 rounded-md outline-none"
+			  bg-blue-600 hover:bg-blue-700 rounded-md "
 			  onclick="add_new_color()"
 			  >
-			      <i class="fa-regular fa-square-plus"></i> Add Color
+			      <i class="fa-regular fa-square-plus"></i> Add ${type == 'tetradic' || type === 'triadic' || type == 'complementary' ? 'Random' : '' } Color
 			  </button>
 			</div>
 		</div>
@@ -329,6 +374,7 @@ function display_palette(palette,type,delete_previous = true){
 }
 
 function generate_palette(base_color, num, scheme = "analogous") {
+    current_algo = scheme
     const base_hsl = hex2hsl(base_color);
     const palette = [];
     let angle;
@@ -379,6 +425,11 @@ function generate_palette(base_color, num, scheme = "analogous") {
         }
         palette.push(_tone.reverse());
     }
+    last_color_in_palette = hsl2hex(
+      palette[palette.length - 1][5][0],
+      palette[palette.length - 1][5][1],
+      palette[palette.length - 1][5][2],
+    )
     return palette;
 }
 
@@ -613,8 +664,8 @@ function fetch_saved_palette(){
   	const child = []
   	data.forEach((e,i) => {
 	  child.push(`
-		<div class="p-2 px-4 rounded-md bg-gray-700 flex 
-		justify-between items-center w-full">
+		<div class="p-2 rounded-md bg-gray-700 flex 
+		  flex-wrap space-x-3 justify-between md:justify-between items-center md:w-1/6 w-full m-2">
 		    <span class="text-xl capitalize">${e.name.replaceAll("_"," ")}</span>
 		    <div class="flex items-center space-x-2">
 		      <button class="hover:text-slate-300 relative"
@@ -630,7 +681,7 @@ function fetch_saved_palette(){
 	    `)
 	})
   	document.querySelector("#saved-palette-list").insertAdjacentHTML('beforeend', `
-		<div class="p-4 flex flex-col w-full space-y-3">
+		<div class="p-4 flex flex-wrap w-full justify-between">
 		    ${child.reverse().join("")}
 		</div> 	
 	  `)
@@ -666,74 +717,8 @@ function delete_saved(index){
 	}
 }
 
-function show_export_menu(){
-  document.querySelector('body').insertAdjacentHTML('beforeend',`
-      <div
-        id="export-menu"
-	class="absolute top-0 left-0 flex justify-center items-center w-screen h-screen bg-black/90">
-	  <div class="flex flex-col rounded-md relative">
-	  	<button class="absolute -top-2 -right-2 text-xl text-slate-400 hover:text-rose-500"
-		onclick="this.parentElement.parentElement.remove()">
-		    <i class="fa-solid fa-circle-xmark"></i>
-		</button>
-		<button onclick="export_palette('css')" class="rounded-t-md p-2 w-[250px] md:w-[320px] h-[100px] 
-		 outline-none
-		 bg-gray-800 hover:bg-gray-700 border-b-2 border-gray-700 text-lg font-semibold">
-		  CSS <i class="fa-brands fa-css3-alt"></i>
-		</button>
-		<button  onclick="export_palette('scss')"class="p-2 w-[250px] md:w-[320px] h-[100px]
-		 outline-none
-		 bg-gray-800 hover:bg-gray-700 border-b-2 border-gray-700 text-lg font-semibold">
-		    SCSS <i class="fa-brands fa-css3"></i>
-		</button>
-		<button  onclick="export_palette('less')" class="p-2 w-[250px] md:w-[320px] h-[100px]
-		 outline-none
-		 bg-gray-800 hover:bg-gray-700 border-b-2 border-gray-700 text-lg font-semibold">
-		   LESS <i class="fa-brands fa-less"></i>
-		  </button>
-		<button onclick="export_palette('tailwind')" class="rounded-b-md p-2 w-[250px] md:w-[320px] h-[100px]
-		 bg-gray-800 hover:bg-gray-700 text-lg
-		 outline-none
-		 font-semibold flex justify-center items-center space-x-3">
-		  <span> Tailwind </span>
-		  <i class="fa-solid fa-code"></i>
-		</button>
-	  </div>
-      </div>
-    `)
-}
-
 function export_palette(type){
-  document.querySelector('#export-menu').remove()
-  document.querySelector('body').insertAdjacentHTML('beforeend',`
-      <div
-        id="export-menu"
-	class="absolute top-0 left-0 flex justify-center items-center w-screen h-screen bg-black/90">
-	  <div class="flex flex-col rounded-md relative">
-	  	<button class="absolute -top-2 -right-2 text-xl text-slate-400 hover:text-rose-500"
-		onclick="this.parentElement.parentElement.remove()">
-		    <i class="fa-solid fa-circle-xmark"></i>
-		</button>
-		<button class="rounded-t-md p-2 w-[250px] md:w-[320px] h-[100px] 
-		 outline-none
-		 bg-gray-800 hover:bg-gray-700 border-b-2 border-gray-700 text-lg font-semibold"
-		 onclick='sanitize_download_copy("${type}","copy")'
-		 >
-		  Copy <i class="fa-solid fa-copy"></i>
-		</button>
-		<button class="p-2 w-[250px] md:w-[320px] h-[100px]
-		 outline-none
-		 bg-gray-800 hover:bg-gray-700 rounded-b-md text-lg font-semibold"
-		 onclick='sanitize_download_copy("${type}","download")'
-		 >
-		   Download <i class="fa-solid fa-download"></i>
-		</button>
-	  </div>
-      </div>
-    `)
-}
-
-function sanitize_download_copy(type,action){
+  document.querySelector('#export-menu').classList.toggle('hidden')
   const data = extract_serialize_color()
   let content
   switch (type) {
@@ -754,15 +739,46 @@ function sanitize_download_copy(type,action){
   		break;
   }
   if(type == "tailwind"){
-    content = JSON.stringify(content)
-    content = `const colors = ${content
-	.replaceAll(",",",\n")
-	.replaceAll('"50"','\n"50"')
-	.replaceAll('{"','{\n"')
-    }`
+    content = JSON.stringify(content,null, "\t")
+    content = `const colors = ${content}`
   } else {
     content = content.join("\n")
   } 
+  document.querySelector('body').insertAdjacentHTML("beforeend", `
+  	<div
+	id="export-menu-final"
+	class="absolute top-0 left-0 flex justify-center items-center w-screen h-screen bg-black/90">
+	  <div class="flex flex-col rounded-md relative p-4 bg-gray-800">
+		  <button class="absolute -top-2 -right-2 text-2xl text-slate-400 hover:text-rose-500"
+		  onclick="document.querySelector('#export-menu-final').remove()">
+		      <i class="fa-solid fa-circle-xmark"></i>
+		  </button>
+	  	<span class="capitalize mb-2 text-xl">Export: ${type}</span>
+		<textarea class="p-2 h-[150px] w-[250px] md:w-[300px] rounded-md
+		bg-gray-700 text-slate-300 resize-none" id="export-textarea"
+		spellcheck="false">${content}</textarea>
+		<div class="flex space-x-3 justify-between items-center mb-2 mt-5">
+		  <button class="p-1 px-2 rounded-md 
+		   bg-blue-600 hover:bg-blue-700 text-lg font-semibold"
+		   onclick='sanitize_download_copy("${type}","copy",
+		   document.querySelector("#export-textarea").value)'
+		   >
+		    Copy <i class="fa-solid fa-copy"></i>
+		  </button>
+		  <button class="p-1 px-2 rounded-md 
+		   bg-blue-600 hover:bg-blue-700 text-lg font-semibold"
+		   onclick='sanitize_download_copy("${type}","download",
+		   document.querySelector("#export-textarea").value)'
+		   >
+		     Download <i class="fa-solid fa-download"></i>
+		  </button>
+		</div>
+	  </div>
+      </div>
+    `)
+}
+
+function sanitize_download_copy(type,action,content){
   if(action == "download"){
     download_file(type == "tailwind" ? `colors.js` : `color.${type}`, `${content}`)
   } else {
@@ -786,7 +802,7 @@ function sanitize_download_copy(type,action){
 	console.log({ERROR:e})
       })
   }
-    document.querySelector("#export-menu").remove()
+    document.querySelector("#export-menu-final").remove()
 }
 
 function change_preview_color_mode(button){
@@ -825,11 +841,11 @@ function render_preview(){
 	  <div class="bg-gray-900 flex 
 	  justify-center
 	  items-center md:pr-5 text-xl">
-		  <button class="m-2 hover:text-slate-400 outline-none"
+		  <button class="m-2 hover:text-slate-400 "
 		  onclick="render_preview()">
 		      <i class="fa-solid fa-dice"></i>
 		  </button>
-		  <button class="m-2 hover:text-slate-400 outline-none"
+		  <button class="m-2 hover:text-slate-400 "
 		  onclick="change_preview_color_mode(this)">
 		      <i class="fa-solid fa-sun"></i>
 		  </button>
@@ -840,9 +856,9 @@ function render_preview(){
 	    Navbar 
 	</span>
 	<div class="px-4 p-2">
-	<div class="flex p-2 justify-between items-center" style="color:${hsl2hex(
-	  ...rand_col()
-	)}">
+	<div 
+	class="flex p-2 justify-between items-center cursor-pointer"
+    	style="color:${hsl2hex(...rand_col())}>
 		<button>
 			<i class="fa-solid fa-bars"></i>
 		</button>
@@ -852,9 +868,9 @@ function render_preview(){
 		  <span>Content</span>
 		</div>
 	</div>
-	<div class="flex p-2 justify-between items-center" style="background:${hsl2hex(
-		  ...rand_col()
-	)}">
+	<div class="flex p-2 justify-between items-center cursor-pointer"
+	  style="background:${hsl2hex(...rand_col())};color:#0f0f0f"
+	>
 		<button>
 			<i class="fa-solid fa-bars"></i>
 		</button>
@@ -870,7 +886,12 @@ function render_preview(){
     color_palette.forEach((b) => {
       button_child.push(
 	`<button style="background:${hsl2hex(b[4][0], b[4][1], b[4][2])}"
-	class="px-4 p-2 rounded-md m-2">Button</button>`
+	  class="px-4 p-2 rounded-md m-2"
+	>
+	      <span style="color:#0f0f0f">
+		  Button
+	      </span>
+	</button>`
       )
     })
     const buttons = `
@@ -889,19 +910,19 @@ function render_preview(){
 	    <span class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
 	    Normal Text!
 	    </span>
-	    <b  class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
+	    <b class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
 	    Bold Text!
 	    </b>
-	    <i   class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
+	    <i class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
 	    Italic Text!
 	    </i>
-	    <u  class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
+	    <u class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
 	     Underline Text!
 	    </u>
-	    <s  class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
+	    <s class="m-2" style="color:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
 	      Strike!
 	    </s>
-	    <mark  class="m-2" style="background:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
+	    <mark class="m-2" style="background:${hsl2hex(b[4][0], b[4][1], b[4][2])}">
 	      Mark!
 	    </mark>
 	  </div>
@@ -920,7 +941,9 @@ function render_preview(){
     color_palette.forEach((b) => {
       border_child.push(
 	`<button style="border:2px solid ${hsl2hex(b[4][0], b[4][1], b[4][2])}"
-	class="px-4 p-2 rounded-md m-2">Button</button>`
+	class="px-4 p-2 rounded-md m-2">
+	  Button
+	</button>`
       )
     })
     const border = `
@@ -937,7 +960,7 @@ function render_preview(){
 	`<span style="
 	box-shadow:${hsl2hex(b[4][0], b[4][1], b[4][2])} 0px 5px 15px;
 	width:60px;height:60px
-	"
+	" 
 	class="px-4 p-2 rounded-md m-5"></span>`
       )
     })
@@ -945,7 +968,7 @@ function render_preview(){
       <span class="m-2 text-xl font-semibold px-2">
 	    Shadow
 	</span>
-	<div class="px-4 p-2 flex flex-wrap justify-start">
+	<div class="px-4 p-2 flex flex-wrap justify-start mb-5">
 		${shadow_child.join("")}
 	</div>
     `
@@ -993,7 +1016,7 @@ function render_preview(){
 	overflow-auto
 	${localStorage.getItem('preview_theme') == 'dark' ? 'bg-slate-900' : 'bg-white'}
 	${localStorage.getItem('preview_theme') == 'dark' ? 'text-slate-300' : 'text-slate-900'}
-	flex flex-col">
+	flex flex-col pb-8">
 		${nav}
 		${buttons}
 		${svg}
@@ -1008,6 +1031,7 @@ function render_preview(){
       `)
   }
 }
+
 
 function read_file_(file) {
     return new Promise((resolve, reject) => {
@@ -1028,10 +1052,46 @@ function open_image_file() {
         if (file) {
             try {
                 const imageDataURL = await read_file_(file);
-	        colorjs.prominent(imageDataURL, { amount: 1, format: "hex" }).then(color => {
-		  document.querySelector("#span-color-picker").style.background = color
-		  document.querySelector("#input-color-picker").value = color
-		  document.querySelector("#input-color-text").value = color
+	        document.querySelector("#span-image-picker > span:last-child").textContent = file.name.slice(
+		  0 , 20
+		)
+	        colorjs.prominent(imageDataURL, { amount: 12, format: "hex" }).then(color => {
+		  document.querySelector("#image-generated-color").innerHTML = ""
+		  color.forEach((e,i) => {
+		    document.querySelector("#image-generated-color").classList.remove("hidden")
+		    document.querySelector("#image-generated-color").insertAdjacentHTML("beforeend",`
+			<button 
+			style="
+				background:${e};
+				width:20px;
+				height:20px;
+				border-radius:5px;
+				margin:0.5rem;
+				"
+				onclick="selected_image_color('${e}',${i})"
+				>
+			</button>
+		      `)
+		  })
+		  document.querySelector("#span-image-picker").parentElement.insertAdjacentHTML("beforeend", `
+		      <button 
+		        id="clear-image-color"
+			class="absolute rounded-s-md top-0 right-0 cursor-pointer hover:brightness-125
+			p-2 font-semibold
+			rounded-e-md text-lg z-20 "
+			onclick="
+	        	document.querySelector('#clear-image-color').remove()
+			document.querySelector('#image-generated-color').classList.add('hidden');
+	        	document.querySelector('#span-image-picker > span:last-child').textContent = 'Upload Image'
+			">
+			  <i class="fa-solid fa-trash"></i>
+		      </button>
+		    `)
+		  document.querySelector("#span-color-picker").style.background = color[0]
+		  document.querySelector("#input-color-picker").value = color[0]
+		  document.querySelector("#input-color-text").value = color[0]
+		  document.querySelector("#image-generated-color > button").classList.add("border-4")
+		  document.querySelector("#image-generated-color > button").classList.add("border-blue-500")
 	      })
             } catch (error) {
                 console.error('Error reading file:', error);
@@ -1039,6 +1099,21 @@ function open_image_file() {
         }
     };
     input.click();
+}
+
+function selected_image_color(color,num){
+    document.querySelectorAll("#image-generated-color > button").forEach((e,i) => {
+		if(i == num){
+		  e.classList.add("border-4")
+		  e.classList.add("border-blue-500")
+		} else {
+		  e.classList.remove("border-4")
+		  e.classList.remove("border-blue-500")
+		}
+    })
+		  document.querySelector("#span-color-picker").style.background = color
+		  document.querySelector("#input-color-picker").value = color
+		  document.querySelector("#input-color-text").value = color
 }
 
 document.addEventListener("DOMContentLoaded", function(e){
