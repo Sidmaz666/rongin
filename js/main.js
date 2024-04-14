@@ -660,6 +660,8 @@ function save_palette(elm){
 function fetch_saved_palette(){
       if(localStorage.getItem('palette') !== null && JSON.parse(localStorage.getItem('palette')).length > 0 ){
   	document.querySelector("#saved-palette-list").innerHTML = ''
+  	document.querySelector("#saved-palette-list").classList.remove("h-full")
+  	document.querySelector("#saved-palette-list").classList.add("h-auto")
 	const data = JSON.parse(localStorage.getItem('palette'))
   	document.querySelector("#saved-palette-list").classList.remove('justify-center')
   	document.querySelector("#saved-palette-list").classList.remove('items-center')
@@ -683,7 +685,7 @@ function fetch_saved_palette(){
 	    `)
 	})
   	document.querySelector("#saved-palette-list").insertAdjacentHTML('beforeend', `
-		<div class="p-4 flex flex-wrap w-full justify-between">
+		<div class="p-4 flex flex-wrap w-full justify-start">
 		    ${child.reverse().join("")}
 		</div> 	
 	  `)
