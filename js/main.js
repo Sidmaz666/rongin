@@ -374,11 +374,13 @@ function display_palette(palette,type,delete_previous = true){
 }
 
 function generate_palette(base_color, num, scheme = "analogous") {
-    current_algo = scheme
     const base_hsl = hex2hsl(base_color);
+    if(base_hsl.s < 10){
+      base_hsl.s = Math.floor(Math.random() * (30 - 10) + 10)
+    }
+    current_algo = scheme
     const palette = [];
     let angle;
-
     switch (scheme) {
         case "triadic":
             angle = 120;
@@ -745,9 +747,10 @@ function export_palette(type){
     content = content.join("\n")
   } 
   document.querySelector('body').insertAdjacentHTML("beforeend", `
-  	<div
+  	<dialog
 	id="export-menu-final"
-	class="absolute top-0 left-0 flex justify-center items-center w-screen h-screen bg-black/90">
+	class="text-slate-300
+	absolute top-0 left-0 flex justify-center items-center w-screen h-screen bg-black/90">
 	  <div class="flex flex-col rounded-md relative p-4 bg-gray-800">
 		  <button class="absolute -top-2 -right-2 text-2xl text-slate-400 hover:text-rose-500"
 		  onclick="document.querySelector('#export-menu-final').remove()">
@@ -774,8 +777,9 @@ function export_palette(type){
 		  </button>
 		</div>
 	  </div>
-      </div>
+      </dialog>
     `)
+  document.querySelector("#export-textarea").focus()
 }
 
 function sanitize_download_copy(type,action,content){
@@ -1082,7 +1086,7 @@ function open_image_file() {
 			onclick="
 	        	document.querySelector('#clear-image-color').remove()
 			document.querySelector('#image-generated-color').classList.add('hidden');
-	        	document.querySelector('#span-image-picker > span:last-child').textContent = 'Upload Image'
+	        	document.querySelector('#span-image-picker > span:last-child').textContent = 'Read Image'
 			">
 			  <i class="fa-solid fa-trash"></i>
 		      </button>
