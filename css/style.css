@@ -2213,8 +2213,8 @@ textarea::-webkit-scrollbar-thumb {
     display: block;
   }
 
-  .md\:w-1\/6 {
-    width: 16.666667%;
+  .md\:w-\[30\%\] {
+    width: 30%;
   }
 
   .md\:w-\[300px\] {

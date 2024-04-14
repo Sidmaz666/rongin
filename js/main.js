@@ -350,7 +350,7 @@ function display_palette(palette,type,delete_previous = true){
 			        onkeydown="event.key == 'Enter' ? event.preventDefault() : '' ;"
 	 			spellcheck="false"
 	 			class="focus:outline-none focus:border-b-2 border-blue-500"
-	 			id="algorithm-input-span">${type.trim()}</span>
+	 			id="algorithm-input-span">${type.trim().replaceAll("_"," ")}</span>
 			      <button class="ml-2 text-slate-400 hover:text-slate-300"
 			      onclick="document.querySelector('#algorithm-input-span').focus();
 				move_cursor2end(document.querySelector('#algorithm-input-span'))">
@@ -375,7 +375,7 @@ function display_palette(palette,type,delete_previous = true){
 	  `)
 }
 
-function generate_palette(base_color, num, scheme = "analogous") {
+function generate_palette(base_color, num, scheme = "golden_ratio_analogous") {
     const base_hsl = hex2hsl(base_color);
     if(base_hsl.s < 10){
       base_hsl.s = Math.floor(Math.random() * (30 - 10) + 10)
@@ -390,8 +390,14 @@ function generate_palette(base_color, num, scheme = "analogous") {
         case "complementary":
             angle = 180;
             break;
+        case "golden_ratio_complementary":
+            angle = 222.492;
+            break;
         case "analogous":
             angle = 30;
+            break;
+        case "golden_ratio_analogous":
+            angle = 137.508;
             break;
         case "tetradic":
             angle = 90;
@@ -415,7 +421,7 @@ function generate_palette(base_color, num, scheme = "analogous") {
 
     for (let i = 0; i < num; i++) {
         if (angle === "random") angle = Math.floor(Math.random() * 360);
-        const new_hue = (base_hsl.h + angle * i) % 360;
+        const new_hue = Math.floor((base_hsl.h + angle * i) % 360);
         const _tone = [];
         for (let j = 1; j <= 10; j++) {
 	    let lum = j * 10
@@ -671,8 +677,16 @@ function fetch_saved_palette(){
   	data.forEach((e,i) => {
 	  child.push(`
 		<div class="p-2 rounded-md bg-gray-700 flex 
-		  flex-wrap space-x-3 justify-between md:justify-between items-center md:w-1/6 w-full m-2">
-		    <span class="text-xl capitalize">${e.name.replaceAll("_"," ")}</span>
+		  flex-wrap space-x-3 justify-between md:justify-between items-center md:w-[30%] w-full m-2">
+		    <span class="text-xl capitalize">${
+		    	e.name.slice(e.name.length - 3, e.name.length) 
+			}
+			${e.name.replace(/_.*/g,'').slice(0,3) }
+			${
+			 e.name.replaceAll("_",' ').split(" ")[2] !== undefined ?
+			 e.name.replaceAll("_",' ').split(" ")[2].slice(0,3) : ''
+			}
+			</span>
 		    <div class="flex items-center space-x-2">
 		      <button class="hover:text-slate-300 relative"
 		      onclick="view_saved(this)" data-saved='${JSON.stringify(e)}'>
