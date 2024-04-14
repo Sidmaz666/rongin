@@ -864,9 +864,9 @@ function render_preview(){
 	    Navbar 
 	</span>
 	<div class="px-4 p-2">
-	<div 
-	class="flex p-2 justify-between items-center cursor-pointer"
-    	style="color:${hsl2hex(...rand_col())}>
+	<div class="flex p-2 justify-between items-center"
+	  style="color:${hsl2hex(...rand_col())}"
+	>
 		<button>
 			<i class="fa-solid fa-bars"></i>
 		</button>
@@ -876,7 +876,7 @@ function render_preview(){
 		  <span>Content</span>
 		</div>
 	</div>
-	<div class="flex p-2 justify-between items-center cursor-pointer"
+	<div class="flex p-2 justify-between items-center"
 	  style="background:${hsl2hex(...rand_col())};color:#0f0f0f"
 	>
 		<button>
