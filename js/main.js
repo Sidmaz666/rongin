@@ -57,7 +57,7 @@ function add_new_color(){
 	    <div class="text-md md:text-2xl font-semibold mb-5 flex w-full justify-between">
 	      <div class="flex justify-between items-center w-full">
 		<div>
-		  <span contenteditable
+		  <span contenteditable="plaintext-only"
 		    onkeydown="event.key == 'Enter' ? event.preventDefault() : '' ;"
 		    spellcheck="false"
 		    class="focus:outline-none focus:border-b-2 border-blue-500"
@@ -156,7 +156,7 @@ function edit_color_tone(elm,trigger){
 	    <div class="text-md md:text-2xl font-semibold mb-5 flex w-full justify-between">
 	      <div class="flex justify-between items-center w-full">
 		<div>
-		  <span contenteditable
+		  <span contenteditable="plaintext-only"
 		    onkeydown="event.key == 'Enter' ? event.preventDefault() : '' ;"
 		    spellcheck="false"
 		    class="focus:outline-none focus:border-b-2 border-blue-500"
@@ -251,7 +251,7 @@ function display_palette(palette,type,delete_previous = true){
 	    <div class="text-md md:text-2xl font-semibold mb-5 flex w-full justify-between">
 	      <div class="flex justify-between items-center w-full">
 		<div>
-		  <span contenteditable
+		  <span contenteditable="plaintext-only"
 		    onkeydown="event.key == 'Enter' ? event.preventDefault() : '' ;"
 		    spellcheck="false"
 		    class="focus:outline-none focus:border-b-2 border-blue-500"
@@ -300,7 +300,7 @@ function display_palette(palette,type,delete_previous = true){
 	document.querySelector("#palette-view").insertAdjacentHTML("beforeend", `
 	  	<div class="p-4 flex flex-col">
 			<div class="text-slate-200 font-semibold 
-	 		   md:mb-1 mb-5 flex md:justify-end justify-start flex-wrap">
+	 		   md:mb-1 mb-5 flex md:justify-end justify-start flex-wrap items-center">
 			   <div class="relative">
 			       <button class="p-2 bg-blue-600 rounded-md px-4 hover:bg-blue-700 m-2"
 			       onclick="
@@ -346,22 +346,24 @@ function display_palette(palette,type,delete_previous = true){
 				</button>
 			</div>
 			   <div class="text-lg md:text-3xl mb-5 md:mb-10 capitalize font-semibold">
-			      <span contenteditable
+			      <span contenteditable="plaintext-only"
 			        onkeydown="event.key == 'Enter' ? event.preventDefault() : '' ;"
 	 			spellcheck="false"
 	 			class="focus:outline-none focus:border-b-2 border-blue-500"
-	 			id="algorithm-input-span">
-				${type.trim()}</span>
+	 			id="algorithm-input-span">${type.trim()}</span>
 			      <button class="ml-2 text-slate-400 hover:text-slate-300"
 			      onclick="document.querySelector('#algorithm-input-span').focus();
 				move_cursor2end(document.querySelector('#algorithm-input-span'))">
 				<i class="fa-solid fa-pen"></i>
 			      </button>
+			   </span>
 			    </div>
 			<div class="flex flex-col mb-5" id="color-palette-list">
 				${elm.join("")}
 			</div>
-			<div class="flex justify-center w-full items-center mb-10">
+			<div class="flex justify-center w-full items-center"
+			style="margin-bottom:5rem;padding-bottom:5rem"
+			>
 			  <button class="p-2 px-4 font-semibold text-lg
 			  bg-blue-600 hover:bg-blue-700 rounded-md "
 			  onclick="add_new_color()"
